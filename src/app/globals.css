@@ -3,25 +3,187 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+	/* text */
+
+	--light-text-primary: #000;
+	--dark-text-primary: #fff;
+
+	--light-text-secondary: #4c4c4c;
+	--dark-text-secondary: #aaaaaa;
+
+	--light-text-secondary-darker: #181818;
+	--dark-text-secondary-darker: #606060;
+
+	--light-text-highlight: #0074de;
+	--dark-text-highlight: #0070f3;
+
+	/* background */
+
+	--light-background: #fff;
+	--dark-background: #000;
+
+	--light-primary: #0074de;
+	--dark-primary: #0070f3;
+
+	--light-secondary: #aaa;
+	--dark--secondary: #aaa;
+
+	--code-light: #000;
+	--code-dark: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+/* theme utility */
+
+html {
+	--background: var(--light-background);
+	--text-secondary: var(--light-text-secondary);
+	--text-dark-secondary: var(--light-text-secondary-darker);
+	--text-primary: var(--light-text-primary);
+	--primary: var(--light-primary);
+	--secondary: var(--light-secondary);
+	--text-highlight: var(--light-text-highlight);
+	--code: var(--code-light);
+
+	color: var(--text-primary);
+	background: var(--background);
+
+	scrollbar-gutter: stable;
 }
 
-body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+html.dark {
+	--background: var(--dark-background);
+	--text-secondary: var(--dark-text-secondary);
+	--text-dark-secondary: var(--dark-text-secondary-darker);
+	--text-primary: var(--dark-text-primary);
+	--primary: var(--dark-primary);
+	--secondary: var(--dark-secondary);
+	--text-highlight: var(--dark-text-highlight);
+	--code: var(--code-dark);
+
+	color: var(--text-primary);
+	background: var(--background);
+}
+
+::selection {
+	background: var(--text-highlight);
+}
+
+@layer components {
+	/* Card container */
+	.card {
+		@apply relative;
+	}
+
+	/* setting padding based on even or odd */
+	.card:nth-child(odd) {
+		@apply py-[30px] pl-[30px];
+	}
+	.card:nth-child(even) {
+		@apply py-[30px] pr-[30px];
+	}
+	/* Global ::before */
+	.card::before {
+		content: '';
+		position: absolute;
+		width: 50%;
+		@apply border-gray-100 dark:border-gray-100/10;
+	}
+
+	/* Setting the border of top, bottom, left */
+	.card:nth-child(odd)::before {
+		left: 0px;
+		top: -4.5px;
+		bottom: -4.5px;
+		border-width: 5px 0 5px 5px;
+		border-radius: 25px 0 0 25px;
+	}
+
+	/* Setting the border of top, bottom, right */
+	.card:nth-child(even)::before {
+		border-width: 5px 5px 5px 0;
+		border-radius: 0 50px 50px 0;
+
+		@apply right-0 top-0 bottom-0;
+	}
+
+	/* Removing the border if it is the first card */
+	.card:first-child::before {
+		@apply border-t-0 rounded-tl-none;
+	}
+
+	/* Removing the border if it is the last card  and it's odd */
+	.card:last-child:nth-child(odd)::before {
+		@apply border-b-0 rounded-bl-none;
+	}
+
+	.card .title {
+		position: relative;
+	}
+
+	/* Timeline dot  */
+	.card .title::before {
+		content: '';
+		position: absolute;
+		width: 16px;
+		height: 16px;
+		background: white;
+		border-radius: 999px;
+		border: 3px solid var(--primary);
+	}
+
+	.card:nth-child(even) .title {
+		@apply items-end text-right md:justify-end md:items-center;
+	}
+
+	.card:nth-child(even) .duration {
+		text-align: right;
+	}
+
+	/* setting dot to the left if the card is odd */
+	.card:nth-child(odd) .title::before {
+		left: -49px;
+	}
+
+	/* setting dot to the right if the card is odd */
+	.card:nth-child(even) .title::before {
+		right: -49px;
+	}
+
+	/* Removing the border if it is the last card  and it's even */
+}
+
+@layer utilities {
+	.pause * {
+		animation-play-state: paused;
+	}
+
+	.text-balance {
+		text-wrap: balance;
+	}
+
+	.prose .anchor {
+		visibility: hidden;
+		z-index: 10;
+		position: absolute;
+		text-decoration-line: none;
+		margin-left: -1em;
+		padding-right: 0.5em;
+		width: 100%;
+		cursor: pointer;
+		max-width: 48rem;
+	}
+
+	.prose h1:hover > .anchor,
+	h2:hover > .anchor,
+	h3:hover > .anchor,
+	h4:hover > .anchor,
+	h5:hover > .anchor,
+	h6:hover > .anchor {
+		visibility: visible;
+	}
+
+	.prose .anchor::after {
+		content: '#';
+		color: #404040;
+	}
 }

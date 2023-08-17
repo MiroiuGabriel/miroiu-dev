@@ -1,0 +1,82 @@
+import { Icon, IconName } from '@miroiu/components';
+import { ViewCounter, Views } from '@miroiu/components/view-counter';
+import { getViewsCount } from '@miroiu/lib/mertics';
+import { formatDate } from '@miroiu/lib/utils';
+
+import { Snippet, allSnippets } from 'contentlayer/generated';
+import Link from 'next/link';
+
+type IconMap = Record<string, IconName>;
+
+const iconMap: IconMap = {
+	React: 'react',
+	'Next.js': 'next',
+	TypeScript: 'typescript',
+};
+
+function getIconName(title: string) {
+	return iconMap[title];
+}
+
+function Snippet({
+	title,
+	description,
+	slugAsParams,
+	published,
+	allViews,
+}: Snippet & { allViews: Views[] }) {
+	const iconName = getIconName(title);
+	const formatedDate = formatDate(published);
+
+	return (
+		<Link
+			href={`/snippets/${slugAsParams}`}
+			className="flex flex-col border gap-2 border-gray-100 dark:border-gray-100/10 p-4 rounded-lg hover:bg-gray-100 hover:bg-gray-100/10 transition-colors duration-300 ease-soft-spring"
+		>
+			<div className="bg-gray-100/10 w-fit p-2 rounded-full">
+				<Icon name={iconName} className="w-6 h-6" />
+			</div>
+			<h2 className="text-2xl font-semibold">{title}</h2>
+			<p className="text-secondary">{description}</p>
+			<p className="text-secondary text-sm">
+				{formatedDate} •{' '}
+				<ViewCounter
+					allViews={allViews}
+					slug={slugAsParams}
+					trackView={false}
+				/>{' '}
+				views
+			</p>
+		</Link>
+	);
+}
+
+export default async function Snippets() {
+	const allViews = await getViewsCount();
+
+	return (
+		<>
+			<h1 className="text-4xl sm:text-5xl font-bold mb-14">
+				Snippets
+				<Icon
+					name="underline"
+					className="h-2 sm:h-3 mt-2 text-highlight"
+				/>
+			</h1>
+
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+				{allSnippets
+					.sort((a, b) =>
+						new Date(a.published) > new Date(b.published) ? -1 : 1
+					)
+					.map(snippet => (
+						<Snippet
+							{...snippet}
+							key={snippet._id}
+							allViews={allViews}
+						/>
+					))}
+			</div>
+		</>
+	);
+}
