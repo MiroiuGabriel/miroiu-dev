@@ -1,5 +1,5 @@
 import { ViewCounter } from '@miroiu/components/view-counter';
-import { getViewsCount } from '@miroiu/lib/mertics';
+import { getViewsCount } from '@miroiu/lib/metrics';
 import { formatDate } from '@miroiu/lib/utils';
 import { allSnippets } from 'contentlayer/generated';
 import { getMDXComponent } from 'next-contentlayer/hooks';
@@ -12,6 +12,10 @@ type Params = {
 export async function generateMetadata({ params }: { params: Params }) {
 	const post = await getDocFromParams(params.slug);
 	return { title: post.title };
+}
+
+export function generateStaticParams() {
+	return allSnippets.map(snippet => ({ slug: snippet.slugAsParams }));
 }
 
 async function getDocFromParams(slug: string) {

@@ -1,6 +1,5 @@
-'use server';
-
-import { db } from '@miroiu/lib/planetscale';
+import { cache } from 'react';
+import { db } from './planetscale';
 
 export async function increment(slug: string) {
 	const data = await db
@@ -17,3 +16,7 @@ export async function increment(slug: string) {
 		.onDuplicateKeyUpdate({ count: views + 1 })
 		.execute();
 }
+
+export const getViewsCount = cache(async () => {
+	return db.selectFrom('views').select(['slug', 'count']).execute();
+});

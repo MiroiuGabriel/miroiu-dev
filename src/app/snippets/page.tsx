@@ -1,6 +1,6 @@
 import { Icon, IconName } from '@miroiu/components';
 import { ViewCounter, Views } from '@miroiu/components/view-counter';
-import { getViewsCount } from '@miroiu/lib/mertics';
+import { getViewsCount } from '@miroiu/lib/metrics';
 import { formatDate } from '@miroiu/lib/utils';
 
 import { Snippet, allSnippets } from 'contentlayer/generated';

@@ -7,9 +7,6 @@ const nextConfig = {
 	images: {
 		minimumCacheTTL: 1024,
 	},
-	experimental: {
-		serverActions: true,
-	},
 };
 
 module.exports = withContentlayer(nextConfig);

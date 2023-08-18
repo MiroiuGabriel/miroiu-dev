@@ -1,6 +1,5 @@
 'use client';
 
-import { increment } from '@miroiu/app/actions';
 import { useEffect } from 'react';
 
 export type Views = {
@@ -20,7 +19,9 @@ export function ViewCounter({ slug, allViews, trackView }: ViewCounterProps) {
 
 	useEffect(() => {
 		if (trackView) {
-			increment(slug);
+			fetch(`/api/views/${slug}`, {
+				method: 'PUT',
+			});
 		}
 	}, [slug, trackView]);
 
