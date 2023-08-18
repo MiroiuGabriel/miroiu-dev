@@ -10,8 +10,40 @@ type Params = {
 };
 
 export async function generateMetadata({ params }: { params: Params }) {
-	const post = await getDocFromParams(params.slug);
-	return { title: post.title };
+	const snippet = await getDocFromParams(params.slug);
+
+	if (!snippet) {
+		return;
+	}
+
+	const { title, publishedAt, description, slugAsParams, image } = snippet;
+
+	const ogImage = image
+		? `${process.env.WEBSITE_URL}/${image}`
+		: `${process.env.WEBSITE_URL}/og?title=${title}`;
+
+	return {
+		title,
+		description,
+		openGraph: {
+			title,
+			description,
+			type: 'article',
+			publishedTime: publishedAt,
+			url: `${process.env.WEBSITE_URL}/blog/${slugAsParams}`,
+			images: [
+				{
+					url: ogImage,
+				},
+			],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [ogImage],
+		},
+	};
 }
 
 export function generateStaticParams() {
@@ -32,7 +64,7 @@ export default async function Snippet({ params }: { params: Params }) {
 
 	const MDXContent = getMDXComponent(snippet.body.code);
 
-	const formatedDate = formatDate(snippet.published);
+	const formatedDate = formatDate(snippet.publishedAt);
 
 	const isProduction = process.env.NODE_ENV === 'production';
 

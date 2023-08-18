@@ -1,7 +1,6 @@
 import {
 	Typewriter,
 	Marquee,
-	Newsletter,
 	Timeline,
 	Icon,
 	Faq,

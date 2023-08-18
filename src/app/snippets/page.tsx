@@ -2,9 +2,16 @@ import { Icon, IconName } from '@miroiu/components';
 import { ViewCounter, Views } from '@miroiu/components/view-counter';
 import { getViewsCount } from '@miroiu/lib/metrics';
 import { formatDate } from '@miroiu/lib/utils';
-
 import { Snippet, allSnippets } from 'contentlayer/generated';
+import { Metadata } from 'next';
+
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+	title: 'Snippets',
+	description:
+		'Read about code constitutes an integral part of my daily workflow.',
+};
 
 type IconMap = Record<string, IconName>;
 
@@ -22,11 +29,11 @@ function Snippet({
 	title,
 	description,
 	slugAsParams,
-	published,
+	publishedAt,
 	allViews,
 }: Snippet & { allViews: Views[] }) {
 	const iconName = getIconName(title);
-	const formatedDate = formatDate(published);
+	const formatedDate = formatDate(publishedAt);
 
 	return (
 		<Link
@@ -67,7 +74,7 @@ export default async function Snippets() {
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				{allSnippets
 					.sort((a, b) =>
-						new Date(a.published) > new Date(b.published) ? -1 : 1
+						new Date(a.publishedAt) > new Date(b.publishedAt) ? -1 : 1
 					)
 					.map(snippet => (
 						<Snippet

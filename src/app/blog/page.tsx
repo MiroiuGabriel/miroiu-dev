@@ -3,16 +3,24 @@ import { ViewCounter, Views } from '@miroiu/components/view-counter';
 import { getViewsCount } from '@miroiu/lib/metrics';
 import { formatDate } from '@miroiu/lib/utils';
 import { Post, allPosts } from 'contentlayer/generated';
+import { Metadata } from 'next';
+
 import Link from 'next/link';
 
+export const metadata: Metadata = {
+	title: 'Blog',
+	description:
+		'Read about my ongoing journey and awesome finds in software development',
+};
+
 function PostCard({
-	published,
+	publishedAt,
 	slugAsParams,
 	description,
 	title,
 	allViews,
 }: Post & { allViews: Views[] }) {
-	const date = formatDate(published);
+	const date = formatDate(publishedAt);
 
 	return (
 		<Link
@@ -51,7 +59,9 @@ export default async function Blog() {
 			<div className="flex flex-col gap-4">
 				{allPosts
 					.sort((a, b) =>
-						new Date(a.published) > new Date(b.published) ? -1 : 1
+						new Date(a.publishedAt) > new Date(b.publishedAt)
+							? -1
+							: 1
 					)
 					.map(post => (
 						<PostCard

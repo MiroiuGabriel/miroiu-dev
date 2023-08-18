@@ -23,7 +23,7 @@ export default function NotFound() {
 				height={256}
 				alt="Not Found"
 				priority
-				className="animate-appearance-in w-full sm:w-64"
+				className="w-full sm:w-64"
 			/>
 		</div>
 	);

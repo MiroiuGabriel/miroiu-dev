@@ -22,14 +22,16 @@
 		"paths": {
 			"@miroiu/*": ["./src/*"],
 			"contentlayer/generated": ["./.contentlayer/generated"]
-		}
+		},
+		"baseUrl": "./"
 	},
 	"include": [
 		"next-env.d.ts",
 		"**/*.ts",
 		"**/*.tsx",
 		".next/types/**/*.ts",
-		".contentlayer/generated"
-, "next.config.js"	],
+		".contentlayer/generated",
+		"next.config.js"
+	],
 	"exclude": ["node_modules"]
 }

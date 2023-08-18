@@ -32,9 +32,12 @@ export const Post = defineDocumentType(() => ({
 			type: 'string',
 			required: true,
 		},
-		published: {
+		publishedAt: {
 			type: 'string',
 			required: true,
+		},
+		image: {
+			type: 'string',
 		},
 	},
 	computedFields,
@@ -53,9 +56,12 @@ export const Snippet = defineDocumentType(() => ({
 			type: 'string',
 			required: true,
 		},
-		published: {
+		publishedAt: {
 			type: 'string',
 			required: true,
+		},
+		image: {
+			type: 'string',
 		},
 	},
 	computedFields,

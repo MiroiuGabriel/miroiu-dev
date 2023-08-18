@@ -11,7 +11,39 @@ type Params = {
 
 export async function generateMetadata({ params }: { params: Params }) {
 	const post = await getDocFromParams(params.slug);
-	return { title: post.title };
+
+	if (!post) {
+		return;
+	}
+
+	const { title, publishedAt, description, slugAsParams, image } = post;
+
+	const ogImage = image
+		? `${process.env.WEBSITE_URL}/${image}`
+		: `${process.env.WEBSITE_URL}/og?title=${title}`;
+
+	return {
+		title,
+		description,
+		openGraph: {
+			title,
+			description,
+			type: 'article',
+			publishedTime: publishedAt,
+			url: `${process.env.WEBSITE_URL}/blog/${slugAsParams}`,
+			images: [
+				{
+					url: ogImage,
+				},
+			],
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title,
+			description,
+			images: [ogImage],
+		},
+	};
 }
 
 export function generateStaticParams() {
@@ -33,7 +65,7 @@ export default async function Post({ params }: { params: Params }) {
 
 	const MDXContent = getMDXComponent(post.body.code);
 
-	const formatedDate = formatDate(post.published);
+	const formatedDate = formatDate(post.publishedAt);
 
 	const isProduction = process.env.NODE_ENV === 'production';
 
