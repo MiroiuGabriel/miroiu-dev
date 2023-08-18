@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
 			>
 				<div
 					style={{
-						marginLeft: 190,
+						marginLeft: 135,
 						marginRight: 190,
 						display: 'flex',
 						fontSize: 130,
