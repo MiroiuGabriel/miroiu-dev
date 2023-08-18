@@ -5,6 +5,7 @@ import { Providers } from './providers';
 import NextLink from 'next/link';
 import { Link } from '@nextui-org/link';
 
+import { Analytics } from '@vercel/analytics/react';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -103,6 +104,7 @@ export default function RootLayout({
 						</div>
 					</footer>
 				</Providers>
+				<Analytics />
 			</body>
 		</html>
 	);
