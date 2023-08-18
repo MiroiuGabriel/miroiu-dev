@@ -8,7 +8,6 @@ import Link from 'next/link';
 function PostCard({
 	published,
 	slugAsParams,
-	slug,
 	description,
 	title,
 	allViews,

@@ -48,6 +48,7 @@ export default function Home() {
 						quality={100}
 						disableSkeleton
 						isZoomed
+						priority
 						classNames={{
 							zoomedWrapper: 'rounded-lg',
 							wrapper: 'rotate-[10deg] mx-auto',

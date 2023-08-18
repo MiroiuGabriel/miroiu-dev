@@ -24,7 +24,7 @@ export default function RootLayout({
 					<Navbar className="max-w-3xl mx-auto px-6" />
 					<main
 						id="skip"
-						className="scroll-m-5 max-w-3xl mx-auto px-6 my-6"
+						className="scroll-m-5 max-w-3xl mx-auto px-6 my-6 overflow-x-hidden sm:overflow-x-visible"
 					>
 						{children}
 					</main>

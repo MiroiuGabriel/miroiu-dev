@@ -18,7 +18,11 @@ export function Navbar({ className, ...props }: NavbarProps) {
 		>
 			<SkipToMain />
 			<div className="flex -ml-3 space-x-2 h-10">
-				<NavLink href="/" className="text-primary">
+				<NavLink
+					href="/"
+					className="text-primary"
+					aria-label="brand logo"
+				>
 					<Icon name="brand" />
 				</NavLink>
 				<NavLink href="/">Home</NavLink>

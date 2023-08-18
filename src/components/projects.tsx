@@ -12,6 +12,7 @@ export function Projects() {
 						className="h-auto w-full rounded-lg"
 						width={384}
 						height={300}
+						priority
 						src={project.image}
 					/>
 					<h3 className="text-2xl font-medium mt-3">
