@@ -1,3 +1,4 @@
+import { components } from '@miroiu/components/mdx';
 import { ViewCounter } from '@miroiu/components/view-counter';
 import { getViewsCount } from '@miroiu/lib/metrics';
 import { formatDate } from '@miroiu/lib/utils';
@@ -91,7 +92,7 @@ export default async function Post({ params }: { params: Params }) {
 				className="prose prose-pre:border prose-pre:rounded-lg prose-pre:border-gray-100 dark:prose-pre:border-gray-100/10 prose-primary max-w-none scroll-m-5"
 				id="#skip"
 			>
-				<MDXContent />
+				<MDXContent components={components} />
 			</article>
 		</div>
 	);

@@ -1,0 +1,223 @@
+---
+title: 3 Must-Know Rendering Optimizations in React
+publishedAt: 2023-8-19
+description: A small world of code
+---
+
+Hello there! This is my first blog post ever, so thank you for reading.
+
+<p>
+	Before we dive deep into these optimizations we must understand why
+	components re-render in React.
+</p>
+
+There are 3 reasons a component will re-render:
+
+1. State changes - these occur when your component's state is altered.
+2. Parent re-render - a parent component's state changes, leading to the recursive re-rendering of all its children.
+3. Context value changes - this occurs when the values in the context, which components share, are modified.
+
+<Callout icon="💡">
+	If you want a deep understanding of how rendering works you should check out{' '}
+	[the official documentation](https://duckduckgo.com "The best search engine
+	for privacy")
+</Callout>
+
+Now that we've got a handle on why re-rendering happens, let's move on to discussing
+on how we can improve performance.
+
+# Passing state down
+
+Let's look at the following example. Can you spot the issue?
+
+```tsx
+export function Component() {
+	const [isOpen, setIsOpen] = useState(false);
+
+	return (
+		<div>
+			<button onClick={() => setIsOpen(true)}>Open</button>
+			{isOpen ? <Popover> ? null}
+			<HeavyComponent />
+			<ReallyHeavyComponent />
+		</div>
+	);
+}
+```
+
+We intend to trigger the popover when the button is clicked.
+It might look fine but whenever the `isOpen` state changes the component re-renders its children that don't change,
+which leads to poor performance.
+So how can we fix this?
+
+We could use `memo` to memoize the components and prevent unnecessary re-renders like this:
+
+```tsx
+const MemoizedHeavyComponent = memo(HeavyComponent);
+const MemoizedReallyHeavyComponent = memo(ReallyHeavyComponent);
+
+export function Component() {
+	return (
+		<div>
+			<ButtonWithPopover />
+			<MemoizedHeavyComponent />
+			<MemoizedReallyHeavyComponent />
+		</div>
+	);
+}
+```
+
+While this works, there is a better solution. We can simply move the state into its own component.
+
+```tsx
+export function ButtonWithPopover() {
+	const [isOpen, setIsOpen] = useState(false);
+
+	return (
+		<>
+			<button onClick={() => setIsOpen(true)}>Open</button>
+			{isOpen ? <Popover> ? null}
+		</>
+	);
+}
+```
+
+Now whenever the state changes, it will only re-render the `ButtonWithPopover` component.
+So the final code will look like this
+
+```tsx
+export function Component() {
+	return (
+		<div>
+			<ButtonWithPopover />
+			<HeavyComponent />
+			<ReallyHeavyComponent />
+		</div>
+	);
+}
+```
+
+# Components as children prop
+
+Consider the following example:
+
+```tsx
+export function Component() {
+	const [scrollY, setScrollY] = useState('');
+
+	return (
+		<div
+			onScroll={({ currentTarget }) =>
+				setScrollY(currentTarget.scrollTop)
+			}
+		>
+			<HeavyComponent />
+			<ReallyHeavyComponent />
+		</div>
+	);
+}
+```
+
+Again, changing the state re-renders the heavy components which is unnecessary.
+We can apply the previous optimization with a twist.
+
+```tsx
+export function WithScroll({ children }) {
+	const [scrollY, setScrollY] = useState('');
+
+	return (
+		<div
+			onScroll={({ currentTarget }) =>
+				setScrollY(currentTarget.scrollTop)
+			}
+		>
+			{children}
+		</div>
+	);
+}
+```
+
+Here we pass our heavy components as `children` and they will be unaffected when state changes inside `WithScroll`.
+
+```tsx
+export function Component() {
+	return (
+		<WithScroll>
+			<HeavyComponent />
+			<ReallyHeavyComponent />
+		</WithScroll>
+	);
+}
+```
+
+Why does this work? Because `children` is just syntax sugar for passing the prop `children`, so this means that the parent,
+in this case `Component` has to re-render for it to do aswell.
+We can write the component from above like this:
+
+```tsx
+export function Component() {
+	return (
+		<WithScroll
+			children={
+				<>
+					<HeavyComponent />
+					<ReallyHeavyComponent />
+				</>
+			}
+		></WithScroll>
+	);
+}
+```
+
+# Components as props
+
+What is wrong here?
+
+```tsx
+export function Component() {
+	const [isCollapsed, setIsCollapsed] = useState(false);
+
+	return (
+		<div className="wrapper">
+			<div className="menu">
+				<SlowComponent />
+			</div>
+			<div className="content">
+				<button onClick={() => setIsCollapsed(!isCollapsed)} />
+				<VerySlowComponent />
+			</div>
+		</div>
+	);
+}
+```
+
+When `isCollapsed` changes the `SlowComponent` and `VerySlowComponent` have to re-render.
+To prevent this we can pass our components as props and it will work the same way `children` do from [Components as children prop](#components-as-children-prop).
+
+```tsx
+export function Component({ menu, content }) {
+	const [isCollapsed, setIsCollapsed] = useState(false);
+
+	return (
+		<div className="wrapper">
+			<div className="menu">{menu}</div>
+			<div className="content">
+				<button onClick={() => setIsCollapsed(!isCollapsed)} />
+				{content}
+			</div>
+		</div>
+	);
+}
+```
+
+And the final code will look like this:
+
+```tsx
+export function ParentComponent({ menu, content }) {
+	return (
+		<Component menu={<SlowComponent />} content={<VerySlowComponent />} />
+	);
+}
+```
+
+Now, unless `ParentComponent` re-renders, whenever state changes inside `Component`, our `menu` and `content` props will be unaffected.

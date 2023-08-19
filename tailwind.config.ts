@@ -50,6 +50,8 @@ const config: Config = {
 						'--tw-prose-headings': 'var(--text-primary)',
 						'--tw-prose-links': 'var(--text-highlight)',
 						'--tw-prose-pre-bg': 'var(--code)',
+						'--tw-prose-bullets': 'var(--text-primary)',
+						'--tw-prose-counters': 'var(--text-primary)',
 					},
 				},
 			}),

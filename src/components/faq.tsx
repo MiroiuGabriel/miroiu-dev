@@ -32,7 +32,7 @@ export function Faq() {
 				>
 					miroiugabriel1231@gmail.com
 				</Link>{' '}
-				or connect with me on
+				or connect with me on{' '}
 				<Link
 					as={NextLink}
 					isExternal
