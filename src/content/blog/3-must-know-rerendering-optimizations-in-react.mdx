@@ -1,15 +1,13 @@
 ---
 title: 3 Must-Know Rendering Optimizations in React
 publishedAt: 2023-8-19
-description: A small world of code
+description: Exploring rendering optimizations with relatable examples to enhance your grasp of optimizing React applications.
 ---
 
 Hello there! This is my first blog post ever, so thank you for reading.
 
-<p>
-	Before we dive deep into these optimizations we must understand why
-	components re-render in React.
-</p>
+    Before we dive deep into these optimizations we must understand why
+    components re-render in React.
 
 There are 3 reasons a component will re-render:
 
@@ -82,7 +80,7 @@ export function ButtonWithPopover() {
 }
 ```
 
-Now whenever the state changes, it will only re-render the `ButtonWithPopover` component.
+Now whenever the state changes, only the `ButtonWithPopover` component will be re-rendered.
 So the final code will look like this
 
 ```tsx
@@ -119,7 +117,7 @@ export function Component() {
 ```
 
 Again, changing the state re-renders the heavy components which is unnecessary.
-We can apply the previous optimization with a twist.
+We can apply the previous optimization with a slight modification.
 
 ```tsx
 export function WithScroll({ children }) {
@@ -210,7 +208,7 @@ export function Component({ menu, content }) {
 }
 ```
 
-And the final code will look like this:
+And the final code is:
 
 ```tsx
 export function ParentComponent({ menu, content }) {
