@@ -5,8 +5,6 @@ import { Metadata } from 'next';
 
 import Link from 'next/link';
 
-export const revalidate = 'force-cache';
-
 export const metadata: Metadata = {
 	title: 'Snippets',
 	description:
