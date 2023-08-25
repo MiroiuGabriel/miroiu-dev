@@ -3,7 +3,7 @@
 import { useTheme } from 'next-themes';
 import { SunIcon, MoonIcon } from '@heroicons/react/20/solid';
 import { useRef } from 'react';
-import { useMouseAngle } from '@miroiu/lib/hooks/useMouseAngle';
+import { useMouseAngle } from '@miroiu/lib/hooks';
 
 export function ThemeButton() {
 	const { setTheme } = useTheme();

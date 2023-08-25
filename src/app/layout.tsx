@@ -43,6 +43,17 @@ export const metadata: Metadata = {
 		google: 'tLsCcvFwzhkjsdCSsMsfWkOEkdKDdkA_5ubpJssCerA',
 		yandex: '66c8b44c093dac6f',
 	},
+	keywords: [
+		'nextjs',
+		'react',
+		'blog',
+		'technical blog content',
+		'portfolio',
+		'developer',
+		'coding',
+		'programming',
+		'software engineer',
+	],
 };
 
 export default function RootLayout({

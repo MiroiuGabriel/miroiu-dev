@@ -6,3 +6,6 @@ export { Newsletter } from './newsletter';
 export { Timeline } from './timeline';
 export { Faq } from './faq';
 export { Projects } from './projects';
+export { Views } from './views';
+export { Share } from './share';
+export {Comments} from './comments';

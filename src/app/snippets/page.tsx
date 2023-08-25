@@ -1,11 +1,11 @@
-import { Icon, IconName } from '@miroiu/components';
-import { ViewCounter, Views } from '@miroiu/components/view-counter';
-import { getViewsCount } from '@miroiu/lib/metrics';
+import { Icon, IconName, Views } from '@miroiu/components';
 import { formatDate } from '@miroiu/lib/utils';
 import { Snippet, allSnippets } from 'contentlayer/generated';
 import { Metadata } from 'next';
 
 import Link from 'next/link';
+
+export const revalidate = 'force-cache';
 
 export const metadata: Metadata = {
 	title: 'Snippets',
@@ -25,13 +25,7 @@ function getIconName(title: string) {
 	return iconMap[title];
 }
 
-function Snippet({
-	title,
-	description,
-	slugAsParams,
-	publishedAt,
-	allViews,
-}: Snippet & { allViews: Views[] }) {
+function Snippet({ title, description, slugAsParams, publishedAt }: Snippet) {
 	const iconName = getIconName(title);
 	const formatedDate = formatDate(publishedAt);
 
@@ -46,12 +40,7 @@ function Snippet({
 			<h2 className="text-2xl font-semibold">{title}</h2>
 			<p className="text-secondary">{description}</p>
 			<p className="text-secondary text-sm">
-				{formatedDate} •{' '}
-				<ViewCounter
-					allViews={allViews}
-					slug={slugAsParams}
-					trackView={false}
-				/>{' '}
+				{formatedDate} • <Views slug={slugAsParams} trackView={false} />{' '}
 				views
 			</p>
 		</Link>
@@ -59,8 +48,6 @@ function Snippet({
 }
 
 export default async function Snippets() {
-	const allViews = await getViewsCount();
-
 	return (
 		<>
 			<h1 className="text-4xl sm:text-5xl font-bold mb-14">
@@ -74,14 +61,12 @@ export default async function Snippets() {
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 				{allSnippets
 					.sort((a, b) =>
-						new Date(a.publishedAt) > new Date(b.publishedAt) ? -1 : 1
+						new Date(a.publishedAt) > new Date(b.publishedAt)
+							? -1
+							: 1
 					)
 					.map(snippet => (
-						<Snippet
-							{...snippet}
-							key={snippet._id}
-							allViews={allViews}
-						/>
+						<Snippet {...snippet} key={snippet._id} />
 					))}
 			</div>
 		</>

@@ -1,7 +1,7 @@
-import { ViewCounter } from '@miroiu/components/view-counter';
-import { getViewsCount } from '@miroiu/lib/metrics';
+import { Views } from '@miroiu/components';
 import { formatDate } from '@miroiu/lib/utils';
 import { allSnippets } from 'contentlayer/generated';
+import { Metadata } from 'next';
 import { getMDXComponent } from 'next-contentlayer/hooks';
 import { notFound } from 'next/navigation';
 
@@ -9,11 +9,15 @@ type Params = {
 	slug: string;
 };
 
-export async function generateMetadata({ params }: { params: Params }) {
+export async function generateMetadata({
+	params,
+}: {
+	params: Params;
+}): Promise<Metadata> {
 	const snippet = await getDocFromParams(params.slug);
 
 	if (!snippet) {
-		return;
+		return {};
 	}
 
 	const { title, publishedAt, description, slugAsParams, image } = snippet;
@@ -60,13 +64,10 @@ async function getDocFromParams(slug: string) {
 
 export default async function Snippet({ params }: { params: Params }) {
 	const snippet = await getDocFromParams(params.slug);
-	const allViews = await getViewsCount();
 
 	const MDXContent = getMDXComponent(snippet.body.code);
 
 	const formatedDate = formatDate(snippet.publishedAt);
-
-	const isProduction = process.env.NODE_ENV === 'production';
 
 	return (
 		<div>
@@ -77,12 +78,7 @@ export default async function Snippet({ params }: { params: Params }) {
 			<div className="flex justify-between mb-8 text-sm">
 				<p className="text-secondary">{formatedDate}</p>
 				<p className="text-secondary">
-					<ViewCounter
-						allViews={allViews}
-						slug={snippet.slugAsParams}
-						trackView={isProduction}
-					/>{' '}
-					views
+					<Views slug={snippet.slugAsParams} /> views
 				</p>
 			</div>
 			<article

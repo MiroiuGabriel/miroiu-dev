@@ -33,7 +33,7 @@ export const experiences: Experience[] = [
 		`,
 	},
 	{
-		icon: 'university',
+		link: '/icons/university.svg',
 		title: 'Facultatea de Stiinte, Educatie Fizica si Informatica',
 		duration: '2022 - 2025 • Ongoing',
 		description: `

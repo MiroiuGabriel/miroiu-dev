@@ -197,3 +197,12 @@ html.dark {
 		margin: 0;
 	}
 }
+
+.dark,
+[data-theme='dark'] {
+	color-scheme: unset !important;
+}
+.light,
+[data-theme='light'] {
+	color-scheme: unset !important;
+}

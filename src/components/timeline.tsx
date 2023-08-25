@@ -9,13 +9,12 @@ export function Timeline() {
 				<div className="card" key={experience.title}>
 					<div className="border border-gray-100 dark:border-gray-100/10 p-3 rounded-lg">
 						<div className="title flex flex-col items-start md:flex-row md:items-center gap-4">
-							{!experience.link && (
+							{!experience.link ? (
 								<Icon
 									name={experience.icon!}
 									className="w-10 h-10"
 								/>
-							)}
-							{experience.link && (
+							) : (
 								<Image
 									alt={experience.title}
 									width={40}

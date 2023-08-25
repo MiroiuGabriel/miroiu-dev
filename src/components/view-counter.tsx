@@ -9,14 +9,11 @@ export type Views = {
 
 type ViewCounterProps = {
 	slug: string;
-	allViews: Views[];
 	trackView?: boolean;
+	views: number;
 };
 
-export function ViewCounter({ slug, allViews, trackView }: ViewCounterProps) {
-	const viewsForSlug = allViews && allViews.find(view => view.slug === slug);
-	const number = new Number(viewsForSlug?.count || 0);
-
+export function ViewCounter({ slug, views, trackView }: ViewCounterProps) {
 	useEffect(() => {
 		if (trackView) {
 			fetch(`/api/views/${slug}`, {
@@ -25,5 +22,5 @@ export function ViewCounter({ slug, allViews, trackView }: ViewCounterProps) {
 		}
 	}, [slug, trackView]);
 
-	return <span className="text-secondary">{number.valueOf()}</span>;
+	return <span className="text-secondary">{views}</span>;
 }

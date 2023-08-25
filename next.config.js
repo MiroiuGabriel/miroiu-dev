@@ -7,14 +7,6 @@ const nextConfig = {
 	images: {
 		minimumCacheTTL: 1024,
 	},
-	headers() {
-		return [
-			{
-				source: '/(.*)',
-				headers: securityHeaders,
-			},
-		];
-	},
 };
 
 const securityHeaders = [

@@ -1,11 +1,11 @@
-import { Icon } from '@miroiu/components';
-import { ViewCounter, Views } from '@miroiu/components/view-counter';
-import { getViewsCount } from '@miroiu/lib/metrics';
+import { Icon, Views } from '@miroiu/components';
 import { formatDate } from '@miroiu/lib/utils';
 import { Post, allPosts } from 'contentlayer/generated';
 import { Metadata } from 'next';
 
 import Link from 'next/link';
+
+export const revalidate = 'force-cache';
 
 export const metadata: Metadata = {
 	title: 'Blog',
@@ -13,13 +13,7 @@ export const metadata: Metadata = {
 		'Read about my ongoing journey and awesome finds in software development',
 };
 
-function PostCard({
-	publishedAt,
-	slugAsParams,
-	description,
-	title,
-	allViews,
-}: Post & { allViews: Views[] }) {
+function PostCard({ publishedAt, slugAsParams, description, title }: Post) {
 	const date = formatDate(publishedAt);
 
 	return (
@@ -32,21 +26,13 @@ function PostCard({
 			</h2>
 			<p className="text-secondary text-lg">{description}</p>
 			<p className="text-secondary mt-4">
-				{date} •{' '}
-				<ViewCounter
-					allViews={allViews}
-					slug={slugAsParams}
-					trackView={false}
-				/>{' '}
-				views
+				{date} • <Views slug={slugAsParams} trackView={false} /> views
 			</p>
 		</Link>
 	);
 }
 
 export default async function Blog() {
-	const allViews = await getViewsCount();
-
 	return (
 		<>
 			<h1 className="text-4xl sm:text-5xl font-bold mb-14">
@@ -64,11 +50,7 @@ export default async function Blog() {
 							: 1
 					)
 					.map(post => (
-						<PostCard
-							key={post._id}
-							{...post}
-							allViews={allViews}
-						/>
+						<PostCard key={post._id} {...post} />
 					))}
 			</div>
 		</>
