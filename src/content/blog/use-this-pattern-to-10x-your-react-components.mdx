@@ -1,0 +1,127 @@
+---
+title: Use This Pattern to 10x Your React Components
+publishedAt: 2023-08-26
+description: Learn how to improve your React components for performance and flexiblity with one simple pattern.
+keywords: React rendering optimizations, React component re-rendering, Enhancing React performance, Compound pattern in react, Compound Pattern, React Patterns, React design patterns, Memoization in React, State management in React, Avoiding unnecessary re-renders, React children prop optimization, Props vs. Children in React, Preventing component re-renders, React component memoization, Performance tips for React applications, React optimization techniques, Avoiding performance bottlenecks in React, React rendering best practices, Optimize React app with memo and props, Understanding React rendering triggers, React context optimization, React re-render triggers, Improving React app performance, Efficient state management in React
+---
+
+By adopting this pattern, you can enhance the performance and flexibility of your React components, reaping numerous advantages.
+However, perhaps most importantly, you'll earn recognition from your fellow programmers for crafting code that is both readable and succinct.
+
+# Compound Pattern and its advantages
+
+You've probably seen this pattern before, its popularity has skyrocketed over the years. Libraries such as Radix UI, Material UI, Chakra UI, and others use it to enhance the developer experience.
+
+Here are the some advantages of using this pattern:
+
+-   Flexibility: Compound components provide a flexible way to build complex UI components while maintaining a clean and concise API.
+
+-   Intuitive API: By encapsulating related child components within a parent component, the Compound Components pattern offers a clear and intuitive API
+
+-   Separation of Concerns: With compound components, each child component is responsible for its specific functionality, making it easier to maintain and update individual components.
+
+-   Customization: It allows developers to easily swap or extend child components
+
+Envision this situation: you're working on a e-commerce application,
+and your product manager wants you to implement a Product Card to showcase the latest products available.
+You open Figma and end up with this design:
+
+<img src="/product-card.png" alt="Product Card" />
+
+Your product manager approves of it and now requests you to proceed with coding. So you end up writing this code:
+
+<iframe
+	style={{ border: '1px solid rgba(0, 0, 0, 0.1)', borderRadius: '8px' }}
+	width="100%"
+	height="400px"
+	src="https://codesandbox.io/p/sandbox/without-compund-pattern-miroiu-dev-forked-c328dp?embed=1"
+	allowFullScreen
+></iframe>
+
+Prior to deploying the code to production, you find yourself thinking, "What if the need arises to incorporate an additional section or alter the layout? Hmm... This lacks scalability!"
+
+You start brainstorming and unknowingly find yourself implementing the compound pattern.
+
+<iframe
+	style={{ border: '1px solid rgba(0, 0, 0, 0.1)', borderRadius: '8px' }}
+	width="100%"
+	height="400px"
+	src="https://codesandbox.io/p/sandbox/with-compound-pattern-miroiu-dev-forked-qw3tz3?file=%2Fsrc%2FApp.tsx&embed=1"
+	allowFullScreen
+></iframe>
+
+"This seems acceptable, but I believe there's room for improvement" you comment. It dawns on you that in JavaScript, functions are objects, allowing you to assign properties to them like so:
+
+```tsx
+function Product(){
+    return {...}
+}
+
+function ProductTitle(){
+    return {...}
+}
+
+// This doesn't throw any errors
+
+Product.Title = ProductTitle;
+
+```
+
+<Callout icon="💡">
+	Typescript offers built-in support for extending components using the
+	compound pattern.
+</Callout>
+
+Your code appears to be in this format currently:
+
+<iframe
+	style={{ border: '1px solid rgba(0, 0, 0, 0.1)', borderRadius: '8px' }}
+	width="100%"
+	height="400px"
+	src="https://codesandbox.io/p/sandbox/with-better-compund-pattern-miroiu-dev-forked-drsmkc?embed=1"
+	allowFullScreen
+></iframe>
+
+You don't hesitate and present it to your product manager, who gives their approval.
+A day later your product manager wants you to change the layout of the component into this:
+
+<img src="/product-card-redesign.png" alt="Product Card" />
+
+Because your intuition was right, you are able make changes effortlessly due to the flexibility of the pattern.
+
+<iframe
+	style={{
+		border: '1px solid rgba(0, 0, 0, 0.1)',
+		borderRadius: '8px',
+		marginBottom: 20,
+	}}
+	width="100%"
+	height="400px"
+	src="https://codesandbox.io/p/sandbox/react-compound-pattern-miroiu-dev-p63yrv?embed=1"
+	allowFullScreen
+></iframe>
+
+<Callout icon="💡">
+	This represents the final version of the code. You can locate various
+	progressions within separate files. Feel free to uncomment and comment them
+	according to your preferences.
+</Callout>
+
+As evident from this brief narrative, the code underwent a progression from
+an inferior state to an improved one. The initial version proved to be
+non-scalable, as any addition of new sections or layout changes would
+necessitate direct modifications to the component. This practice is
+undesirable as it contradicts the SOLID principle of "open to extension,
+closed to modification," and introduces unnecessary complexity.
+
+The second version represents a notable enhancement in terms of scalability. It boasts
+a clear separation of concerns, making the process of adding or removing components
+significantly easier. One could even consider stopping at this stage, given the high
+level of flexibility and performance achieved.
+
+In the final version, a minor adjustment
+was made to enhance readability, resulting in the requirement to import just a single
+object. This seemingly small modification has a positive impact on the overall code
+quality and maintainability.
+Of course, this is a very simplified version of a real life component,
+if your component is stateful I recommend using the Context API.
