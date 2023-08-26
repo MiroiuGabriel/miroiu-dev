@@ -13,7 +13,7 @@ type ViewCounterProps = {
 	views: number;
 };
 
-export function ViewCounter({ slug, views, trackView }: ViewCounterProps) {
+export function ViewCounter({ slug, views, trackView = false }: ViewCounterProps) {
 	useEffect(() => {
 		if (trackView) {
 			fetch(`/api/views/${slug}`, {

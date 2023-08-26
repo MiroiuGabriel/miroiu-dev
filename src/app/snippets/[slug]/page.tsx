@@ -69,6 +69,8 @@ export default async function Snippet({ params }: { params: Params }) {
 
 	const formatedDate = formatDate(snippet.publishedAt);
 
+	const shouldTrackView = process.env.NODE_ENV === 'production';
+
 	return (
 		<div>
 			<h1 className="text-3xl sm:text-5xl tracking-tighter font-bold mb-2 text-balance">
@@ -78,7 +80,11 @@ export default async function Snippet({ params }: { params: Params }) {
 			<div className="flex justify-between mb-8 text-sm">
 				<p className="text-secondary">{formatedDate}</p>
 				<p className="text-secondary">
-					<Views slug={snippet.slugAsParams} /> views
+					<Views
+						slug={snippet.slugAsParams}
+						trackView={shouldTrackView}
+					/>{' '}
+					views
 				</p>
 			</div>
 			<article

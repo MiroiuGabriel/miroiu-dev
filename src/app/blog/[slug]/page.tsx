@@ -72,6 +72,8 @@ export default async function Post({ params }: { params: Params }) {
 
 	const formatedDate = formatDate(post.publishedAt);
 
+	const shouldTrackView = process.env.NODE_ENV === 'production';
+
 	return (
 		<div>
 			<h1 className="text-3xl sm:text-5xl tracking-tighter font-bold mb-2 text-balance">
@@ -84,7 +86,11 @@ export default async function Post({ params }: { params: Params }) {
 					<Share slug={post.slugAsParams} />
 
 					<p className="text-secondary">
-						<Views slug={post.slugAsParams} /> views
+						<Views
+							slug={post.slugAsParams}
+							trackView={shouldTrackView}
+						/>{' '}
+						views
 					</p>
 				</div>
 			</div>

@@ -6,12 +6,8 @@ type ViewCounterProps = {
 	trackView?: boolean;
 };
 
-export async function Views({ slug, trackView }: ViewCounterProps) {
+export async function Views({ slug, trackView = false }: ViewCounterProps) {
 	const views = await getViewCountBySlug(slug);
 
-	const shouldTrackView = trackView || process.env.NODE_ENV === 'production';
-
-	return (
-		<ViewCounter slug={slug} views={views} trackView={shouldTrackView} />
-	);
+	return <ViewCounter slug={slug} views={views} trackView={trackView} />;
 }
