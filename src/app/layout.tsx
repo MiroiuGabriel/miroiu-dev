@@ -129,11 +129,15 @@ export default function RootLayout({
 								</Link>
 								<Link
 									as={NextLink}
-									href="/resume.pdf"
+									href="https://medium.com/@miroiu-dev"
 									isExternal
 									className="text-secondary"
 								>
-									Resume
+									<Icon
+										name="medium"
+										className="w-6 h-6 mr-2"
+									/>
+									Medium
 								</Link>
 							</div>
 							<div className="hidden sm:flex flex-col items-center justify-center">
