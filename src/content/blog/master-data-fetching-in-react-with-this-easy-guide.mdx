@@ -1,0 +1,497 @@
+---
+title: Master Data Fetching in React with This Easy Guide
+publishedAt: 2023-09-02
+description: Efficient Data Fetching in React - Leveraging Third-Party Libraries for Optimal Performance.
+keywords: React rendering optimizations, React Query, useSWR, SWR, Data fetching, Data fetching in React ,React component re-rendering, Enhancing React performance, Compound pattern in react, Compound Pattern, React Patterns, React design patterns, Memoization in React, State management in React, Avoiding unnecessary re-renders, React children prop optimization, Props vs. Children in React, Preventing component re-renders, React component memoization, Performance tips for React applications, React optimization techniques, Avoiding performance bottlenecks in React, React rendering best practices, Optimize React app with memo and props, Understanding React rendering triggers, React context optimization, React re-render triggers, Improving React app performance, Efficient state management in React
+---
+
+<img src="/data-fetching-thumbnail.png" alt="Thumbnail" />
+
+Fetching data efficiently in React is quite challenging. We must rely on third-party libraries for caching, data synchronization between tabs, deduplication, revalidation, etc. Since reinventing the wheel is not optimal, the best choice would be to use a library.
+
+In this article, I will show you how to go from a naive approach to data fetching to an efficient one. You will also learn to use libraries like react-query and SWR.
+
+## Building off of the naive approach
+
+I can guarantee you have seen a similar code or are guilty of writing this yourself.
+
+Suppose you have a component with the primary objective of displaying data about a beer.
+
+```tsx
+type Beer = {
+	id: number;
+	brand: string;
+	name: string;
+	yeast: string;
+	malts: string;
+	alcohol: string;
+};
+
+function NaiveDataFetching() {
+	const [beer, setBeer] = useState<Beer | undefined>();
+	const [error, setError] = useState('');
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		fetch('https://random-data-api.com/api/v2/beers')
+			.then(res => res.json())
+			.then((data: Beer) => {
+				setLoading(false);
+				setBeer(data);
+			})
+			.catch(error => {
+				console.log(error);
+				setError('Something went wrong');
+			});
+	}, []);
+
+	if (error) return <div>{error}</div>;
+
+	if (loading) return <div>loading...</div>;
+
+	return (
+		<div>
+			<p>id: {beer?.id}</p>
+			<p>brand: {beer?.brand}</p>
+			<p>name: {beer?.name}</p>
+			<p>yeast: {beer?.yeast}</p>
+			<p>malts: {beer?.malts}</p>
+			<p>alcohol: {beer?.alcohol}</p>
+		</div>
+	);
+}
+```
+
+Before I inform you what issues arise with this code, I would like to bring to your attention this specific useEffect caveat, as stated in the official React documentation.
+
+> When Strict Mode is on, React will run one extra development-only setup+cleanup cycle before the first real setup. This is a stress-test that ensures that your cleanup logic “mirrors” your setup logic and that it stops or undoes whatever the setup is doing. If this causes a problem, implement the cleanup function.
+
+## Fixing racing conditions
+
+In React 18, during development, the useEffect hook is called twice. Fetching data without implementing a cleanup function will result in what’s known as “race conditions”. This occurs because network responses may arrive in a different order than sent requests, causing you to see results from multiple requests instead of just the latest one.
+
+You can see the data updating twice, which isn’t the desired behavior.
+
+<img src="/use-effect-twice.gif" alt="Use effect gets called twice" />
+
+So, how can we address and resolve this issue? The following way is taken from the React documentation.
+
+We can tackle this issue by introducing a variable named `ignore`, initially set to false. When we receive the data, we check if this variable is true. If true, we assign the beer data accordingly. But how does `ignore` change to true? To accomplish this, we must implement a cleanup function responsible for setting `ignore` back to false, this will be called during the unmounting of the component. During the initial mount, the data will be ignored because after the unmount, `ignore` will be set to true. This results in the retrieval of the most recent data during the second mount. This occurs exclusively during development; in a production setting, `useEffect` executes only once.
+
+```tsx
+useEffect(() => {
+	let ignore = false;
+	fetch('https://random-data-api.com/api/v2/beers')
+		.then(res => res.json())
+		.then((data: Beer) => {
+			if (!ignore) {
+				setLoading(false);
+				setBeer(data);
+			}
+		})
+		.catch(error => {
+			console.log(error);
+			setError('Something went wrong');
+		});
+
+	return () => {
+		ignore = true;
+	};
+}, []);
+```
+
+While this works, there is a minor issue. The first request is still fulfilled even though the component is unmounted, we just don't update our state.
+
+## Introducing Abort Controller
+
+The `AbortController` interface represents a controller object that allows you to abort one or more Web requests as and when desired.
+
+This is exactly what we want. We simply want to abort irrelevant requests.
+
+```tsx
+useEffect(() => {
+	const controller = new AbortController();
+
+	fetch('https://random-data-api.com/api/v2/beers', {
+		signal: controller.signal,
+	})
+		.then(res => res.json())
+		.then((data: Beer) => {
+			setLoading(false);
+			setBeer(data);
+		})
+		.catch(error => {
+			if (error instanceof DOMException) {
+				console.log('Request aborted', error.message);
+				return;
+			}
+
+			setError('Something went wrong');
+		});
+
+	return () => controller.abort();
+}, []);
+```
+
+<Callout icon="💡">
+	When `abort()` is called, the `fetch()` promise is rejected with a
+	`DOMException` named `AbortError`. In this case, we only want to see an
+	error related to the data fetching, not aborting the request.
+</Callout>
+
+## Issues regarding this approach
+
+Fetching data in this manner makes our code tightly coupled to the component. What if we want another Beer component that uses this data differently? It also violates the SOLID Principles, because the component should only be responsive for displaying the data. (This used to be fixed with an HOC in the past, now we have custom hooks).
+
+## Using useFetchBeerData hook
+
+To make the code more reusable we can extract it into a custom hook.
+
+```tsx
+function useFetchBeerData() {
+	const [beer, setBeer] = useState<Beer | undefined>();
+	const [error, setError] = useState('');
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		const controller = new AbortController();
+
+		fetch('https://random-data-api.com/api/v2/beers', {
+			signal: controller.signal,
+		})
+			.then(res => res.json())
+			.then((data: Beer) => {
+				setLoading(false);
+				setBeer(data);
+			})
+			.catch(error => {
+				if (error instanceof DOMException) {
+					console.log('Request aborted', error.message);
+					return;
+				}
+
+				setError('Something went wrong');
+			});
+
+		return () => controller.abort();
+	}, []);
+
+	return { beer, error, loading };
+}
+
+function NaiveDataFetching() {
+	const { beer, error, loading } = useFetchBeerData();
+
+	// Rest of your component logic
+}
+```
+
+This is great. Now we can reuse our fetching logic in any component without copying and pasting the code. There is one issue though, it is too specific. What if we want to fetch a beer that doesn’t meet our `Beer` interface, has another URL, or for other reasons?
+
+No worries. I got you covered. We can make our hook more generic.
+
+```tsx
+export function useFetch<T>(
+	fetcher: (signal: AbortSignal) => Promise<T>,
+	rerun?: any[]
+): {
+	data?: T;
+	loading: boolean;
+	error: unknown;
+} {
+	const [data, setData] = useState<T>();
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState();
+
+	const deps = rerun ? [...rerun] : [];
+
+	useEffect(() => {
+		const controller = new AbortController();
+
+		fetcher(controller.signal)
+			.then(d => {
+				setLoading(false);
+				setData(d);
+			})
+			.catch(error => {
+				setError(error);
+			});
+
+		return () => controller.abort();
+	}, [...deps]);
+
+	return {
+		data,
+		loading,
+		error,
+	};
+}
+```
+
+A `fetcher` is simply a function that we pass to our hook. Its purpose is to decouple the fetching logic from the hook itself, enabling us to provide various implementations. For instance:
+
+```tsx
+async function fetchBeer(signal: AbortSignal) {
+	const { data } = await axios.get<Beer>(
+		'https://random-data-api.com/api/v2/beers',
+		{ signal }
+	);
+
+	return data;
+}
+```
+
+Or the following:
+
+```tsx
+async function fetchBeer(signal: AbortSignal) {
+	const response = await fetch('https://random-data-api.com/api/v2/beers', {
+		signal,
+	});
+	const data = await response.json();
+
+	return data as Beer;
+}
+```
+
+And simply switch it as needed.
+
+```tsx
+function BetterDataFetching(){
+  const {data, error, loading} = useFetch<Beer>(fetchBeer)
+
+  // This is a viable way to check for errors. Note: For axios replace DOMException with CanceledError.
+  // Checking for errors thrown by Aborting a request is only specific to my example so the code can render.
+
+  if(error && !(error instanceof DOMException)) return <div>{(error as Error).message}</div>
+
+  // Rest of your component logic
+```
+
+What does the `rerun` parameter do? It essentially provides us with the ability to re-fetch our data when we have dependencies. For example, if we have a property like `budget` from the query string, we want our data to be updated whenever it changes.
+
+This code is far better than what we started with, and it will work perfectly if you don’t need all the benefits of using a library. For simple projects this is perfect. It proved to be valuable during the
+[project](https://github.com/miroiu-dev/practica2023 'Summer Internship Repository') I worked on during my Summer Internship at Roweb.
+
+# React Query
+
+React Query is hands down one of the best libraries for managing server state. It works amazingly well out-of-the-box, with zero-config, and can be customized to your liking as your application grows.
+
+React Query allows you to defeat and overcome the tricky challenges and hurdles of server state and control your app data before it starts to control you.
+
+Let’s see how we can implement react-query into our example. First, install it into your project `npm i @tanstack/react-query`. To use React Query effectively, it’s essential to wrap your application code with the `QueryClientProvider`. If you skip this step, React Query won't work.
+
+```tsx
+const client = new QueryClient();
+
+function App() {
+	return (
+		<QueryClientProvider client={client}>
+			<ReactQueryFetching />
+		</QueryClientProvider>
+	);
+}
+```
+
+Once you have wrapped your application with the QueryClientProvider, you can easily fetch your data using React Query.
+
+```tsx
+function ReactQueryFetching() {
+	const {
+		data: beer,
+		error,
+		isLoading,
+	} = useQuery<Beer>({ queryKey: ['beer'], queryFn: fetchBeer });
+
+	if (error instanceof Error) return <div>{error.message}</div>;
+
+	if (isLoading) return <div>loading...</div>;
+
+	return (
+		<div>
+			<p>id: {beer?.id}</p>
+			<p>brand: {beer?.brand}</p>
+			<p>name: {beer?.name}</p>
+			<p>yeast: {beer?.yeast}</p>
+			<p>malts: {beer?.malts}</p>
+			<p>alcohol: {beer?.alcohol}</p>
+		</div>
+	);
+}
+```
+
+The `useQuery` hook handles various aspects of data fetching and management, including caching, request deduplication, revalidation, and more.
+
+The `queryKey` parameter takes a key that can be an array of strings, numbers, and objects. The key is used to cache your data, which can be useful in many cases. Query Keys are **hashed deterministically!** This means that no matter the order of keys in objects, they are considered equal.
+
+```tsx
+useQuery({ queryKey: ['todos', { status, page }], ... })
+
+// they are the same
+
+useQuery({ queryKey: ['todos', { page, status }], ...})
+```
+
+This `queryFn` is where you define the logic for fetching the data you want to query, and React Query uses this function to manage the data and provide caching, revalidation, and other features. It is the same concept we used in the custom hook.
+
+## Handling and Throwing Errors
+
+A query function can be any function that returns a promise. The promise that is returned should either resolve the data or throw an error. Any error that is thrown in the query function will persist on the `error` state of the query.
+
+```tsx
+async function fetchBeer() {
+	const response = await fetch('https://random-data-api.com/api/v2/beers');
+
+	if (!response.ok) {
+		// this will be persisted in our error state
+		throw new Error('Network response was not ok');
+	}
+
+	const data = await response.json();
+
+	return data as Beer;
+}
+```
+
+## Data Mutations
+
+In the context of data mutation, imagine we have a state containing an array of beers, and our goal is to append a new beer to the database while simultaneously updating the user interface upon button click. This can be accomplished straightforwardly by supplying a mutation function and specifying the query key to the `queryClient` to trigger data revalidation.
+
+```tsx
+// Mutation function
+
+async function addBeer(newBeer: FormData) {
+	await fetch('https://example.beer-api.com', newBeer);
+}
+
+// Inside component
+
+const queryClient = useQueryClient();
+
+const mutation = useMutation({
+	mutationFn: addBeer,
+	onSuccess: () => queryClient.invalidateQueries({ queryKey: ['beers'] }),
+});
+
+const onSubmit = event => {
+	event.preventDefault();
+	mutation.mutate(new FormData(event.target));
+};
+
+return <form onSubmit={onSubmit}>...</form>;
+```
+
+This is all you need to get started. If you want to read more about react-query please visit their [website](https://tanstack.com/query/latest/docs/react/overview 'React Query documnetation').
+
+# SWR
+
+SWR (Stale-While-Revalidate) is a popular JavaScript library used for data fetching and caching in client-side applications. It’s often used in React and other modern frontend frameworks to simplify the management of remote data.
+
+Inside your React project directory, run the following: `npm i swr`.
+
+Then you can import `useSWR` and start using it inside any function components:
+
+```tsx
+import useSWR from 'swr';
+
+async function fetchBeer() {
+	const response = await fetch('https://random-data-api.com/api/v2/beers');
+	const data = await response.json();
+
+	return data as Beer;
+}
+
+function Beer() {
+	const { data, error, isLoading } = useSWR('beer', fetchBeer);
+
+	if (error) return <div>failed to load</div>;
+
+	if (isLoading) return <div>loading...</div>;
+
+	return <div>Brand - {beer.brand}!</div>;
+}
+```
+
+The first parameter takes a **string** that represents a key, just like in react-query, used to cache your data. The second parameter takes a `fetcher` function where you define the logic for fetching data. The third parameter is optional, it takes an object of options.
+
+```tsx
+const { data, error, isLoading, isValidating, mutate } = useSWR(
+	key,
+	fetcher,
+	options
+);
+```
+
+<Callout icon="💡">
+	By default, `key` will be passed to `fetcher` as the argument. So the
+	following 3 expressions are equivalent:
+</Callout>
+
+```tsx
+useSWR('beer', () => fetcher('beer'));
+useSWR('beer', url => fetcher(url));
+useSWR('beer', fetcher);
+```
+
+An excellent feature offered by this library is its automatic data revalidation when you refocus a page or switch between tabs.
+
+<img src="/revalidation-between-tabs.gif" alt="revalidation" />
+
+## Handling and Throwing Errors
+
+If an error is thrown inside `fetcher`, it will be returned as `error` by the hook.
+
+```tsx
+async function fetchBeer() {
+	const response = await fetch('https://random-data-api.com/api/v2/beers');
+
+	if (!response.ok) {
+		// this will be persisted in our error state
+		throw new Error('Network response was not ok');
+	}
+
+	const data = await response.json();
+
+	return data as Beer;
+}
+```
+
+## Data Mutations
+
+In the scenario previously mentioned in react-query, where we’re dealing with an array of beers, you can easily update the data by calling the `mutate` function with the new data. This straightforward approach allows for seamless data mutation and UI updates.
+
+```tsx
+const { data, mutate } = useSWR('beers', fetcher)
+
+const onSubmit = (event) => {
+    event.preventDefault()
+
+    const newBeer = { ... }
+
+    mutate([...data, newBeer]);
+  }
+
+ return <form onSubmit={onSubmit}>...</form>
+```
+
+In this context, there’s no need for a key as you would use in React Query because the `mutate` function is directly associated with the component.
+
+## Revalidation
+
+When you call `mutate(key)` or just `mutate()` without any data, it will trigger a revalidation for the resource.
+
+```tsx
+// tell all SWRs with this key to revalidate
+
+<button onClick={() => mutate('beer')}>Revalidate</button>
+```
+
+This is all you need to get started with `SWR`. If you want to read more please visit their [website](https://swr.vercel.app/docs/getting-started 'SWR official documentation').
+
+# Ending Remarks
+
+Both of these hooks enable you to create infinite scrolling or pagination. As it is beyond this tutorial's scope, I will not discuss it.
+
+This article serves as an initial guide for fetching data in React. If you wish to delve deeper into this topic, I recommend visiting the documentation of the respective libraries mentioned, as they offer comprehensive information. Here, the aim was to provide you with the essential information to help you get started quickly.
+
+If you have any questions regarding this article or found it helpful, please feel free to leave a response, clap, or follow for more content. Your feedback and engagement are greatly appreciated!

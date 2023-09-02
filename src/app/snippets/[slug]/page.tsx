@@ -88,7 +88,7 @@ export default async function Snippet({ params }: { params: Params }) {
 				</p>
 			</div>
 			<article
-				className="prose prose-pre:scrollbar-hide prose-pre:border prose-pre:rounded-lg prose-pre:border-gray-100 dark:prose-pre:border-gray-100/10 prose-primary max-w-none scroll-m-5"
+				className="prose prose-pre:scrollbar-hide prose-code:scrollbar-hide prose-pre:border prose-pre:rounded-lg prose-pre:border-gray-100 dark:prose-pre:border-gray-100/10 prose-primary max-w-none scroll-m-5"
 				id="#skip"
 			>
 				<MDXContent />

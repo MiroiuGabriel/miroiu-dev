@@ -95,7 +95,7 @@ export default async function Post({ params }: { params: Params }) {
 				</div>
 			</div>
 			<article
-				className="prose prose-img:rounded-lg prose-pre:border prose-pre:rounded-lg prose-pre:border-gray-100 dark:prose-pre:border-gray-100/10 prose-primary max-w-none scroll-m-5"
+				className="prose prose-strong:font-bold prose-img:rounded-lg prose-pre:border prose-pre:scrollbar-hide prose-pre:rounded-lg prose-pre:border-gray-100 dark:prose-pre:border-gray-100/10 prose-primary max-w-none scroll-m-5"
 				id="#skip"
 			>
 				<MDXContent components={components} />
