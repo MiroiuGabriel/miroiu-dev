@@ -118,7 +118,7 @@ export default function RootLayout({
 								</Link>
 								<Link
 									as={NextLink}
-									href="https://github.com/MiroiuGabriel"
+									href="https://github.com/miroiu-dev"
 									className="text-secondary"
 								>
 									<Icon
