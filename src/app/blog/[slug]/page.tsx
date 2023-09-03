@@ -60,6 +60,8 @@ export function generateStaticParams() {
 async function getDocFromParams(slug: string) {
 	const post = allPosts.find(post => post.slugAsParams === slug);
 
+	console.log(allPosts, slug);
+
 	if (!post) notFound();
 
 	return post;
